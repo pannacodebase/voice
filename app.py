@@ -4,16 +4,25 @@ import requests
 from authlib.integrations.flask_client import OAuth
 from flask import Flask, abort, redirect, render_template, session, url_for
 
+# Function to fetch configuration values from the database
+def get_config_value(key):
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute('SELECT value FROM config WHERE key = ?', (key,))
+    value = c.fetchone()
+    conn.close()
+    return value[0] if value else None
+
 # Initialize Flask app
 app = Flask(__name__)
 
-# Configuration
+# Fetch configuration values from the database
 appConf = {
-    "OAUTH2_CLIENT_ID": "687109020293-j8icghjie923r63ds76si2okihkkcccl.apps.googleusercontent.com",
-    "OAUTH2_CLIENT_SECRET": "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",
-    "OAUTH2_META_URL": "https://accounts.google.com/.well-known/openid-configuration",
-    "FLASK_SECRET": "ALongRandomlyGeneratedString",
-    "FLASK_PORT": 5000
+    "OAUTH2_CLIENT_ID": get_config_value('OAUTH2_CLIENT_ID'),
+    "OAUTH2_CLIENT_SECRET": get_config_value('OAUTH2_CLIENT_SECRET'),
+    "OAUTH2_META_URL": get_config_value('OAUTH2_META_URL'),
+    "FLASK_SECRET": get_config_value('FLASK_SECRET'),
+    "FLASK_PORT": int(get_config_value('FLASK_PORT'))  # Ensure the port is an integer
 }
 
 app.secret_key = appConf.get("FLASK_SECRET")
