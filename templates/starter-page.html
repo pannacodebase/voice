@@ -28,11 +28,9 @@
   <!-- Main CSS File -->
   <link href="assets/css/main.css" rel="stylesheet">
 
-  <!-- Main CSS File -->
-  <link href="assets/css/main.css" rel="stylesheet">
-  
   <!-- Google Sign-In Library -->
   <script src="https://apis.google.com/js/platform.js" async defer></script>
+  
 </head>
 
 <body class="starter-page-page">
@@ -42,7 +40,7 @@
 
       <a href="index.html" class="logo d-flex align-items-center">
         <img src="assets/img/logo.png"/>
-		<h1 class="sitename">VOICE</h1>
+        <h1 class="sitename">VOICE</h1>
       </a>
 
       <nav id="navmenu" class="navmenu">
@@ -59,7 +57,6 @@
 
   <main class="main">
 
-
     <!-- Hero Section -->
     <section id="hero" class="hero section dark-background">
       <img src="assets/img/hero-bg-2.jpg" alt="" class="hero-bg">
@@ -70,11 +67,12 @@
             <img src="assets/img/hero-img.png" class="img-fluid animated" alt="">
           </div>
 
-          <div class="col-lg-6  d-flex flex-column justify-content-center" data-aos="fade-in">
-            <h1><span>VOICE</span> empowers parents of neurodiverse children. </h1>
-            <p>VOICE strives to create a supportive network for families, offering guidance and tools to enhance their kids ability</p>
+          <div class="col-lg-6 d-flex flex-column justify-content-center" data-aos="fade-in">
+            <h1><span>VOICE</span> empowers parents of neurodiverse children.</h1>
+            <p>VOICE strives to create a supportive network for families, offering guidance and tools to enhance their kids' abilities.</p>
             <div class="d-flex">
-              <a href="#about" class="btn-get-started">Get Started</a>
+              <!-- Google Sign-In Button -->
+              <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
               <a href="https://www.youtube.com/watch?v=zObuIiBpJ1s" class="glightbox btn-watch-video d-flex align-items-center"><i class="bi bi-play-circle"></i><span>Watch Video</span></a>
             </div>
           </div>
@@ -103,7 +101,6 @@
 
   <footer id="footer" class="footer dark-background">
 
-
     <div class="container copyright text-center mt-4">
       <p>© <span>Copyright</span> <strong class="px-1 sitename">VOICE</strong> <span>All Rights Reserved</span></p>
     </div>
@@ -117,7 +114,6 @@
   <div id="preloader"></div>
 
   <!-- Vendor JS Files -->
-  <!-- Vendor JS Files -->
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="assets/vendor/php-email-form/validate.js"></script>
   <script src="assets/vendor/aos/aos.js"></script>
@@ -125,32 +121,35 @@
   <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
   <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
 
-
   <!-- Main JS File -->
   <script src="assets/js/main.js"></script>
   
   <!-- Google Sign-In Script -->
-     <script>
-      function onSignIn(googleUser) {
-        // Get the Google user profile information
-        var profile = googleUser.getBasicProfile();
-        console.log('ID: ' + profile.getId());
-        console.log('Name: ' + profile.getName());
-        console.log('Image URL: ' + profile.getImageUrl());
-        console.log('Email: ' + profile.getEmail());
-        
-        // Optionally, you can send the ID token to your server for verification and to create a session
-        var id_token = googleUser.getAuthResponse().id_token;
-        console.log('ID Token: ' + id_token);
-        
-        // Here you might want to send the token to your server or handle login completion
-        // Example: sendTokenToServer(id_token);
-      }
+  <script>
+    function onSignIn(googleUser) {
+      // Get the Google user profile information
+      var profile = googleUser.getBasicProfile();
+      console.log('ID: ' + profile.getId());
+      console.log('Name: ' + profile.getName());
+      console.log('Image URL: ' + profile.getImageUrl());
+      console.log('Email: ' + profile.getEmail());
+      
+      // Optionally, you can send the ID token to your server for verification and to create a session
+      var id_token = googleUser.getAuthResponse().id_token;
+      console.log('ID Token: ' + id_token);
+      
+      // Here you might want to send the token to your server or handle login completion
+      // Example: sendTokenToServer(id_token);
+    }
 
-      function onSignOut() {
-        var auth2 = gapi.auth2.getAuthInstance();
-        auth2.signOut().then(function () {
-          console.log('User signed out.');
-        });
-      }
-    </script>
+    function onSignOut() {
+      var auth2 = gapi.auth2.getAuthInstance();
+      auth2.signOut().then(function () {
+        console.log('User signed out.');
+      });
+    }
+  </script>
+  
+</body>
+
+</html>
