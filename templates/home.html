@@ -4,13 +4,105 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #ddd;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        .logo img {
+            height: 50px;
+            margin-right: 10px;
+        }
+        .hero {
+            background-image: url('hero-bg.png'); /* Replace with your hero image path */
+            background-size: cover;
+            background-position: center;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #fff;
+            padding: 20px;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+        }
+        .hero h2 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        .hero p {
+            margin: 10px 0;
+            font-size: 1.2em;
+        }
+        .btn-google {
+            background-color: #4285F4;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            font-size: 1em;
+        }
+        .btn-google img {
+            height: 20px;
+            margin-right: 10px;
+        }
+        footer {
+            background-color: #f1f1f1;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome{% if session.user %}, {{ session.user.userinfo.name }}{% endif %}!</h1>
-    {% if not session.user %}
-        <a href="{{ url_for('googleLogin') }}">Login with Google</a>
-    {% else %}
-        <a href="{{ url_for('logout') }}">Logout</a>
-    {% endif %}
+    <header>
+        <div class="logo">
+            <img src="logo.png" alt="Voice Logo"> <!-- Replace with your logo path -->
+            <div>
+                <h1>VOICE</h1>
+                <p>Voice of Parents for Inclusion, Care and Empowerment of Children with Special Needs</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="hero">
+        <div>
+            <h2>Welcome{% if session.user %}, {{ session.user.userinfo.name }}{% endif %}!</h2>
+            {% if not session.user %}
+                <a class="btn-google" href="{{ url_for('googleLogin') }}">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo">
+                    Login with Google
+                </a>
+            {% else %}
+                <a class="btn-google" href="{{ url_for('logout') }}">
+                    Logout
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2024 VOICE. All rights reserved.
+    </footer>
 </body>
 </html>
