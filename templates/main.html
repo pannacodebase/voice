@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+        .chat-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border-radius: 8px;
+        }
+        .chat-box {
+            margin-bottom: 20px;
+        }
+        .chat-box p {
+            margin: 5px 0;
+        }
+        .input-box {
+            display: flex;
+            align-items: center;
+        }
+        .input-box input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            margin-right: 10px;
+        }
+        .input-box button {
+            padding: 10px 20px;
+            background-color: #4285F4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Welcome, {{ user.userinfo.name }}!</h2>
+    <div class="chat-container">
+        <div class="chat-box" id="chatBox">
+            <p id="question">Does your child have ASD, DMD, or CP?</p>
+        </div>
+        <div class="input-box">
+            <input type="text" id="response" placeholder="Type your answer here...">
+            <button onclick="submitAnswer()">Submit</button>
+        </div>
+    </div>
+
+    <script>
+        let step = 0;
+        const questions = [
+            "Does your child have ASD, DMD, or CP?",
+            "Which school is your child studying in?",
+            "Any other special needs we should know about?"
+        ];
+
+        function submitAnswer() {
+            const chatBox = document.getElementById("chatBox");
+            const response = document.getElementById("response").value;
+            
+            if (response.trim() === "") return;
+
+            // Add response to chat history
+            chatBox.innerHTML += `<p><strong>You:</strong> ${response}</p>`;
+
+            // Move to the next question
+            step++;
+            if (step < questions.length) {
+                document.getElementById("question").textContent = questions[step];
+                document.getElementById("response").value = "";
+            } else {
+                chatBox.innerHTML += `<p>Thank you for providing the details!</p>`;
+                document.getElementById("response").style.display = 'none';
+            }
+
+            // Save response to the database (using a POST request)
+            fetch("/save-child-detail", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ step: step - 1, answer: response })
+            });
+        }
+    </script>
+</body>
+</html>

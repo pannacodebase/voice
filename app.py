@@ -11,7 +11,10 @@ def get_config_value(key):
     c.execute('SELECT value FROM config WHERE key = ?', (key,))
     value = c.fetchone()
     conn.close()
-    return value[0] if value else None
+    if value:
+        return value[0]
+    else:
+        raise ValueError(f"Configuration key '{key}' not found in the database")
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -22,10 +25,10 @@ appConf = {
     "OAUTH2_CLIENT_SECRET": get_config_value('OAUTH2_CLIENT_SECRET'),
     "OAUTH2_META_URL": get_config_value('OAUTH2_META_URL'),
     "FLASK_SECRET": get_config_value('FLASK_SECRET'),
-    "FLASK_PORT": int(get_config_value('FLASK_PORT'))  # Ensure the port is an integer
+    "FLASK_PORT": int(get_config_value('FLASK_PORT') or 5000)  # Default port is 5000 if not found
 }
 
-app.secret_key = appConf.get("FLASK_SECRET")
+app.secret_key = appConf.get("FLASK_SECRET") or 'supersecretkey'
 
 # Set up OAuth
 oauth = OAuth(app)
@@ -39,10 +42,20 @@ oauth.register(
     server_metadata_url=f'{appConf.get("OAUTH2_META_URL")}',
 )
 
-# Create the SQLite database and table
+# Create the SQLite database and tables
 def create_database():
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
+    
+    # Create config table if not exists
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS config (
+            key TEXT PRIMARY KEY,
+            value TEXT
+        )
+    ''')
+
+    # Create user table
     c.execute('''
         CREATE TABLE IF NOT EXISTS user (
             id TEXT PRIMARY KEY,
@@ -56,7 +69,7 @@ def create_database():
     conn.commit()
     conn.close()
 
-# Save user to the database
+# Save user information to the database
 def save_user_to_db(user_info):
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
@@ -65,11 +78,10 @@ def save_user_to_db(user_info):
     email = user_info['userinfo'].get('email', '')
     name = user_info['userinfo'].get('name', '')
     picture = user_info['userinfo'].get('picture', '')
-    
-    # Handle optional fields
+
+    # Handle optional fields (gender and birthdate)
     gender = None
     birthdate = None
-
     if 'personData' in user_info:
         person_data = user_info['personData']
         if 'genders' in person_data and person_data['genders']:
@@ -102,7 +114,14 @@ def googleCallback():
     token["personData"] = personData
     session["user"] = token
     save_user_to_db(token)
-    return redirect(url_for("home"))
+    return redirect(url_for("main"))
+
+@app.route("/main")
+def main():
+    user = session.get("user")
+    if not user:
+        return redirect(url_for("home"))
+    return render_template("main.html", user=user)
 
 @app.route("/google-login")
 def googleLogin():
