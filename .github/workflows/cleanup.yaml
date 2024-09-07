@@ -17,4 +17,4 @@ jobs:
       - name: Cleanup Koyeb application
         uses: koyeb/action-git-deploy/cleanup@v1
         with:
-          app-name: php-${{ github.event.ref }}
+          app-name: flask-${{ github.event.ref }}
