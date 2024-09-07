@@ -90,7 +90,7 @@
             <h2>Welcome{% if session.user %}, {{ session.user.userinfo.name }}{% endif %}!</h2>
             {% if not session.user %}
                 <a class="btn-google" href="{{ url_for('googleLogin') }}">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo">
+                    <img src="{{ url_for('static', filename='images/google.png') }}" alt="Google Logo">
                     Login with Google
                 </a>
             {% else %}
