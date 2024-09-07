@@ -28,7 +28,7 @@
             margin-right: 10px;
         }
         .hero {
-            background-image: url('{{ url_for('static', filename='images/hero-bg.png') }}'); /* Correct Hero image reference */
+            background-image: url('{{ url_for('static', filename='images/hero-bg.jpg') }}'); /* Correct Hero image reference */
             background-size: cover;
             background-position: center;
             height: 400px;
@@ -87,10 +87,22 @@
     
     <div class="hero">
         <div>
-            <h2>Welcome{% if session.user %}, {{ session.user.userinfo.name }}{% endif %}!</h2>
+            <h2>Welcome {% if session.user %}, {{ session.user.userinfo.name }}{% endif %}!</h2>
+            <p>
+                VOICE is a community-driven platform dedicated to supporting parents of neurodiverse children.
+                We believe in the power of inclusion, care, and empowerment for children with special needs. 
+                Our goal is to provide resources, guidance, and a supportive community for parents, helping 
+                them navigate the challenges and joys of raising neurodiverse children.
+            </p>
+            <p>
+                Through shared experiences and expert insights, VOICE aims to foster a more inclusive world 
+                where every child is given the opportunity to thrive. Join us and become part of a growing 
+                community of parents committed to making a positive difference.
+            </p>
             {% if not session.user %}
                 <a class="btn-google" href="{{ url_for('googleLogin') }}">
                     <img src="{{ url_for('static', filename='images/google.png') }}" alt="Google Logo">
+                    
                     Login with Google
                 </a>
             {% else %}
