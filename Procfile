@@ -1,1 +1,1 @@
-web: gunicorn -b :$PORT app:app
+web: heroku-php-nginx web/
