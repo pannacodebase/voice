@@ -4,142 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #ffffff;
-            color: #000;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #fff;
-            padding: 20px;
-            height: 15vh;
-            border-bottom: 1px solid #ddd;
-        }
-        .logo {
-            display: flex;
-            align-items: center;
-        }
-        .logo img {
-            height: 40px;
-            margin-right: 15px;
-        }
-        .logo h1 {
-            font-size: 1.8em;
-            font-weight: bold;
-            margin: 0;
-        }
-        .logo p {
-            font-size: 0.9em;
-            color: #555;
-        }
-        .welcome-message {
-            font-size: 1.5em;
-            margin-left: 20px;
-            color: #333;
-        }
-        .logout {
-            background-color: #000;
-            color: #fff;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-        }
-        hr {
-            border: 0;
-            border-top: 1px solid #ddd;
-            margin: 10px 0;
-        }
-        .content {
-            display: flex;
-            flex: 1;
-            padding: 20px;
-            height: 70vh;
-        }
-        .sidebar {
-            width: 30%;
-            padding: 20px;
-            background-color: #f1f1f1;
-            border-right: 1px solid #ddd;
-        }
-        .main-area {
-            width: 70%;
-            padding: 20px;
-            background-color: #ffffff;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-        }
-        footer {
-            background-color: #000;
-            color: #fff;
-            text-align: center;
-            padding: 10px 0;
-            height: 10vh;
-        }
-        .category {
-            cursor: pointer;
-            padding: 10px;
-            border: 1px solid #ddd;
-            margin-bottom: 10px;
-            background-color: #f9f9f9;
-        }
-        .category:hover {
-            background-color: #e0e0e0;
-        }
-    </style>
-    <script>
-        async function loadQuestions(category) {
-            const response = await fetch(`/questions/${category}`);
-            const questions = await response.json();
-            const questionsContainer = document.getElementById('questions');
-            questionsContainer.innerHTML = '';
-
-            questions.forEach(q => {
-                const questionElement = document.createElement('div');
-                questionElement.textContent = q.question;
-                questionsContainer.appendChild(questionElement);
-            });
-        }
-    </script>
-</head>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    $(document).ready(function() {
-        $('.sidebar a').on('click', function(e) {
-            e.preventDefault();
-            var category = $(this).data('category');
-            $.ajax({
-                url: '/questions/' + category,
-                method: 'GET',
-                success: function(data) {
-                    var questionsHtml = '<ul>';
-                    data.forEach(function(item) {
-                        questionsHtml += '<li>' + item.question + '</li>';
-                    });
-                    questionsHtml += '</ul>';
-                    $('.main-area').html(questionsHtml);
-                },
-                error: function() {
-                    $('.main-area').html('<p>An error occurred while fetching the questions.</p>');
-                }
-            });
-        });
-    });
-</script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
 <header>
@@ -158,20 +23,172 @@
 </div>
 
 <div class="content">
-    <div class="sidebar">
-        <a href="#" data-category="about_child">About Your Child</a>
-        <a href="#" data-category="therapies">Therapies</a>
-        <a href="#" data-category="policies">Policies</a>
-        <a href="#" data-category="local_laws">Local Laws</a>
-        <a href="#" data-category="learning_resources">Learning Resources</a>
-    </div>
+    <!-- Include the sidebar from sidebar.html -->
+    {% include 'sidebar.html' %}    
+        
     <div class="main-area">
-        <!-- Questions will be loaded here -->
+        <div class="button-container">
+            <div class="category-button" onclick="loadQuestions('about_child')">About Your Child</div>
+            <div class="category-button" onclick="loadQuestions('therapies')">Therapies</div>
+            <div class="category-button" onclick="loadQuestions('policies')">Policies</div>
+            <div class="category-button" onclick="loadQuestions('local_laws')">Local Laws</div>
+            <div class="category-button" onclick="loadQuestions('learning_resources')">Learning Resources</div>
+        </div>
+        <div id="sub-questions" class="sub-questions">
+            <!-- Sub-questions will be loaded here -->
+        </div>
+        <div id="answer-box" class="answer-box" style="display: none;">
+            <textarea id="answer-input" rows="3" placeholder="Type your response here..."></textarea>
+            <button onclick="submitResponse()">Submit</button>
+        </div>
+        <select id="answer-select" style="display: none;"></select>
+        <div id="answer-list" style="display: none;"></div>
     </div>
 </div>
 
 <footer>
     &copy; 2024 VOICE. All rights reserved.
 </footer>
+
+<script>
+    let currentQuestionId = null; // Initialize globally or set dynamically
+    const userId = "{{ user.userinfo.id }}"; // Set current user ID from server-side template
+    
+    function handleQuestionClick(question) {
+        console.log('Question clicked:', question); // Debugging statement
+        currentQuestionId = question.id; // Set current question ID
+        const answerBox = document.getElementById('answer-box');
+        const answerSelect = document.getElementById('answer-select');
+        const answerList = document.getElementById('answer-list');
+        
+        // Hide all input types initially
+        answerBox.style.display = 'none';
+        answerSelect.style.display = 'none';
+        answerList.style.display = 'none';
+        
+        // Debugging statement to check question type and response required
+        console.log('Question type:', question.question_type);
+        console.log('Response required:', question.response_required);
+        
+        // Ensure response_required is a string or number and compare accordingly
+        if (question.response_required == '1') { // Check if response is required
+            if (question.question_type === 1) {
+                answerBox.style.display = 'block';
+                document.getElementById('answer-input').focus();
+            } else if (question.question_type === 2) {
+                // Populate and show select dropdown
+                const select = document.getElementById('answer-select');
+                select.innerHTML = ''; // Clear existing options
+                question.options.forEach(opt => {
+                    const option = document.createElement('option');
+                    option.value = opt;
+                    option.textContent = opt;
+                    select.appendChild(option);
+                });
+                select.style.display = 'block';
+            } else if (question.question_type === 3) {
+                // Populate and show list box in a table-like grid
+                const list = document.getElementById('answer-list');
+                list.innerHTML = ''; // Clear existing options
+                question.options.forEach((opt, index) => {
+                    // Create a table cell
+                    const cell = document.createElement('div');
+                    cell.style.border = '1px solid transparent'; // Transparent border
+                    cell.style.padding = '5px';
+    
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.value = opt;
+                    checkbox.id = `checkbox-${index}`; // Unique ID
+    
+                    const label = document.createElement('label');
+                    label.htmlFor = checkbox.id;
+                    label.textContent = opt;
+    
+                    cell.appendChild(checkbox);
+                    cell.appendChild(label);
+                    list.appendChild(cell);
+                });
+                list.style.display = 'grid'; // Ensure grid layout is applied
+            }
+        } else {
+            console.log('Response not required for this question');
+        }
+    }
+            
+    async function loadQuestions(category) {
+        try {
+            const response = await fetch(`/questions/${category}`);
+            
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+    
+            const contentType = response.headers.get('Content-Type');
+            if (contentType && contentType.includes('application/json')) {
+                const questions = await response.json();
+                const subQuestionsContainer = document.getElementById('sub-questions');
+                subQuestionsContainer.innerHTML = '';
+                const answerBox = document.getElementById('answer-box');
+                const answerSelect = document.getElementById('answer-select');
+                const answerList = document.getElementById('answer-list');
+    
+                // Hide all input types when loading new questions
+                answerBox.style.display = 'none';
+                answerSelect.style.display = 'none';
+                answerList.style.display = 'none';
+    
+                questions.forEach(q => {
+                    const button = document.createElement('div');
+                    button.textContent = q.question;
+                    button.className = 'sub-question-button';
+                    button.onclick = () => handleQuestionClick(q);
+                    subQuestionsContainer.appendChild(button);
+                });
+            } else {
+                console.error('Expected JSON but received:', contentType);
+            }
+        } catch (error) {
+            console.error('Error loading questions:', error);
+        }
+    }
+
+    async function submitResponse() {
+        let response = '';
+        if (document.getElementById('answer-box').style.display === 'block') {
+            response = document.getElementById('answer-input').value;
+        } else if (document.getElementById('answer-select').style.display === 'block') {
+            response = document.getElementById('answer-select').value;
+        } else if (document.getElementById('answer-list').style.display === 'block') {
+            response = Array.from(document.querySelectorAll('#answer-list input:checked')).map(checkbox => checkbox.value).join(', ');
+        }
+        
+        if (currentQuestionId && userId) {
+            try {
+                await fetch('/submit_response', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        question_id: currentQuestionId,
+                        response: response
+                    })
+                });
+                // Clear and hide the answer inputs
+                document.getElementById('answer-input').value = '';
+                document.getElementById('answer-select').value = '';
+                document.querySelectorAll('#answer-list input').forEach(cb => cb.checked = false);
+                document.getElementById('answer-box').style.display = 'none';
+                document.getElementById('answer-select').style.display = 'none';
+                document.getElementById('answer-list').style.display = 'none';
+            } catch (error) {
+                console.error('Error submitting response:', error);
+            }
+        }
+    }
+
+</script>
 </body>
 </html>

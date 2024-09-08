@@ -1,10 +1,10 @@
 import sqlite3
 import json
-from flask import Flask, jsonify, redirect, render_template, session, url_for, abort
+from flask import Flask, jsonify, redirect, render_template, session, url_for, abort, request
 import requests
 from authlib.integrations.flask_client import OAuth
-from chat.chat_interface import get_questions_by_category
-
+from sidebar import get_users
+from chat.chat_interface import get_questions_by_category, handle_submit_response
 
 # Function to fetch configuration values from the database
 def get_config_value(key):
@@ -81,7 +81,6 @@ def save_user_to_db(user_info):
     name = user_info['userinfo'].get('name', '')
     picture = user_info['userinfo'].get('picture', '')
 
-    # Handle optional fields (gender and birthdate)
     gender = None
     birthdate = None
     if 'personData' in user_info:
@@ -123,7 +122,9 @@ def main():
     user = session.get("user")
     if not user:
         return redirect(url_for("home"))
-    return render_template("main.html", user=user)
+
+    user_list = get_users()
+    return render_template("main.html", user=user, users=user_list)
 
 @app.route("/google-login")
 def googleLogin():
@@ -131,13 +132,16 @@ def googleLogin():
         abort(404)
     return oauth.google.authorize_redirect(redirect_uri=url_for("googleCallback", _external=True))
 
-@app.route("/questions/<category>")
+@app.route('/submit_response', methods=['POST'])
+def submit_response():
+    data = request.get_json()
+    response = handle_submit_response(data)
+    return jsonify(response)
+
+@app.route('/questions/<category>', methods=['GET'])
 def get_questions(category):
-    try:
-        questions = get_questions_by_category(category)
-        return jsonify([{'question': q} for q in questions])
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    questions = get_questions_by_category(category)
+    return jsonify(questions)
 
 @app.route("/logout")
 def logout():

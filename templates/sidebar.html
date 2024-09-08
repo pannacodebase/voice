@@ -1,0 +1,14 @@
+<div class="user-list">
+    {% if users %}
+        {% for user in users %}
+        <div class="user-item">
+            <img src="{{ user.picture }}" alt="User Photo">
+            <span>{{ user.name }}</span>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No users found</p>
+    {% endif %}
+
+</div>
+
