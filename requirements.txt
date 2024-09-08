@@ -9,3 +9,4 @@ authlib
 requests
 urllib3
 python-dotenv
+jsonify

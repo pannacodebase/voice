@@ -1,8 +1,10 @@
-import json
 import sqlite3
+import json
+from flask import Flask, jsonify, redirect, render_template, session, url_for, abort
 import requests
 from authlib.integrations.flask_client import OAuth
-from flask import Flask, abort, redirect, render_template, session, url_for
+from chat.chat_interface import get_questions_by_category
+
 
 # Function to fetch configuration values from the database
 def get_config_value(key):
@@ -128,6 +130,14 @@ def googleLogin():
     if "user" in session:
         abort(404)
     return oauth.google.authorize_redirect(redirect_uri=url_for("googleCallback", _external=True))
+
+@app.route("/questions/<category>")
+def get_questions(category):
+    try:
+        questions = get_questions_by_category(category)
+        return jsonify([{'question': q} for q in questions])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route("/logout")
 def logout():

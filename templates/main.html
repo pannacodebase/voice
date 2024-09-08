@@ -5,92 +5,173 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             font-family: Arial, sans-serif;
             background-color: #ffffff;
-            margin: 0;
+            color: #000;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fff;
             padding: 20px;
+            height: 15vh;
+            border-bottom: 1px solid #ddd;
         }
-        .chat-container {
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 10px;
-            background-color: #f1f1f1;
-            border-radius: 8px;
-        }
-        .chat-box {
-            margin-bottom: 20px;
-        }
-        .chat-box p {
-            margin: 5px 0;
-        }
-        .input-box {
+        .logo {
             display: flex;
             align-items: center;
         }
-        .input-box input[type="text"] {
-            width: 80%;
-            padding: 10px;
-            margin-right: 10px;
+        .logo img {
+            height: 40px;
+            margin-right: 15px;
         }
-        .input-box button {
+        .logo h1 {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin: 0;
+        }
+        .logo p {
+            font-size: 0.9em;
+            color: #555;
+        }
+        .welcome-message {
+            font-size: 1.5em;
+            margin-left: 20px;
+            color: #333;
+        }
+        .logout {
+            background-color: #000;
+            color: #fff;
             padding: 10px 20px;
-            background-color: #4285F4;
-            color: white;
             border: none;
             border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid #ddd;
+            margin: 10px 0;
+        }
+        .content {
+            display: flex;
+            flex: 1;
+            padding: 20px;
+            height: 70vh;
+        }
+        .sidebar {
+            width: 30%;
+            padding: 20px;
+            background-color: #f1f1f1;
+            border-right: 1px solid #ddd;
+        }
+        .main-area {
+            width: 70%;
+            padding: 20px;
+            background-color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        footer {
+            background-color: #000;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            height: 10vh;
+        }
+        .category {
+            cursor: pointer;
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+        }
+        .category:hover {
+            background-color: #e0e0e0;
         }
     </style>
-</head>
-<body>
-    <h2>Welcome, {{ user.userinfo.name }}!</h2>
-    <div class="chat-container">
-        <div class="chat-box" id="chatBox">
-            <p id="question">Does your child have ASD, DMD, or CP?</p>
-        </div>
-        <div class="input-box">
-            <input type="text" id="response" placeholder="Type your answer here...">
-            <button onclick="submitAnswer()">Submit</button>
-        </div>
-    </div>
-
     <script>
-        let step = 0;
-        const questions = [
-            "Does your child have ASD, DMD, or CP?",
-            "Which school is your child studying in?",
-            "Any other special needs we should know about?"
-        ];
+        async function loadQuestions(category) {
+            const response = await fetch(`/questions/${category}`);
+            const questions = await response.json();
+            const questionsContainer = document.getElementById('questions');
+            questionsContainer.innerHTML = '';
 
-        function submitAnswer() {
-            const chatBox = document.getElementById("chatBox");
-            const response = document.getElementById("response").value;
-            
-            if (response.trim() === "") return;
-
-            // Add response to chat history
-            chatBox.innerHTML += `<p><strong>You:</strong> ${response}</p>`;
-
-            // Move to the next question
-            step++;
-            if (step < questions.length) {
-                document.getElementById("question").textContent = questions[step];
-                document.getElementById("response").value = "";
-            } else {
-                chatBox.innerHTML += `<p>Thank you for providing the details!</p>`;
-                document.getElementById("response").style.display = 'none';
-            }
-
-            // Save response to the database (using a POST request)
-            fetch("/save-child-detail", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ step: step - 1, answer: response })
+            questions.forEach(q => {
+                const questionElement = document.createElement('div');
+                questionElement.textContent = q.question;
+                questionsContainer.appendChild(questionElement);
             });
         }
     </script>
+</head>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.sidebar a').on('click', function(e) {
+            e.preventDefault();
+            var category = $(this).data('category');
+            $.ajax({
+                url: '/questions/' + category,
+                method: 'GET',
+                success: function(data) {
+                    var questionsHtml = '<ul>';
+                    data.forEach(function(item) {
+                        questionsHtml += '<li>' + item.question + '</li>';
+                    });
+                    questionsHtml += '</ul>';
+                    $('.main-area').html(questionsHtml);
+                },
+                error: function() {
+                    $('.main-area').html('<p>An error occurred while fetching the questions.</p>');
+                }
+            });
+        });
+    });
+</script>
+</head>
+<body>
+<header>
+    <div class="logo">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Voice Logo">
+        <div>
+            <h1>VOICE</h1>
+            <p>Voice of Parents for Inclusion, Care and Empowerment of Children with Special Needs</p>
+        </div>
+    </div>
+    <a class="logout" href="{{ url_for('logout') }}">Logout</a>
+</header>
+
+<div class="welcome-message">
+    Welcome, {{ user.userinfo.name }}!
+</div>
+
+<div class="content">
+    <div class="sidebar">
+        <a href="#" data-category="about_child">About Your Child</a>
+        <a href="#" data-category="therapies">Therapies</a>
+        <a href="#" data-category="policies">Policies</a>
+        <a href="#" data-category="local_laws">Local Laws</a>
+        <a href="#" data-category="learning_resources">Learning Resources</a>
+    </div>
+    <div class="main-area">
+        <!-- Questions will be loaded here -->
+    </div>
+</div>
+
+<footer>
+    &copy; 2024 VOICE. All rights reserved.
+</footer>
 </body>
 </html>
